@@ -20,6 +20,13 @@ import { type VerifyWebhookOptions, verifyWebhook } from './verify.js';
 const VERSION = '0.1.1';
 const DEFAULT_BASE_URL = 'https://api.vaartix.com';
 
+/** Drop trailing slashes. A loop, not a regex, so a very long input can't slow it down. */
+function trimTrailingSlashes(url: string): string {
+  let end = url.length;
+  while (end > 0 && url[end - 1] === '/') end--;
+  return url.slice(0, end);
+}
+
 export class Vaartix {
   readonly emails: Emails;
   readonly batch: Batch;
@@ -36,7 +43,7 @@ export class Vaartix {
       );
     }
     this.#key = key;
-    this.#baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
+    this.#baseUrl = trimTrailingSlashes(options.baseUrl ?? DEFAULT_BASE_URL);
     this.#fetch = options.fetch ?? globalThis.fetch;
     this.emails = new Emails(this);
     this.batch = new Batch(this);
