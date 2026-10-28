@@ -1,0 +1,75 @@
+{
+  "name": "vaartix",
+  "version": "0.1.1",
+  "description": "Official Node.js SDK for the Vaartix email API",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://vaartix.com/docs/sdks/node/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vaartix-mail/vaartix-node.git"
+  },
+  "keywords": [
+    "email",
+    "transactional-email",
+    "api",
+    "india",
+    "vaartix",
+    "react-email",
+    "ses",
+    "sdk"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --clean --target node18 && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@react-email/render": "^1.0.0 || ^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@react-email/render": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.3",
+    "@react-email/render": "^2.1.1",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tsup": "^9.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "sideEffects": false,
+  "bugs": {
+    "url": "https://github.com/vaartix-mail/vaartix-node/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

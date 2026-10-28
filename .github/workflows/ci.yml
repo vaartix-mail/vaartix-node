@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  # The package supports Node 18, so check the built files load there too.
+  node-18:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 18
+      - name: Import with ESM and CommonJS
+        run: |
+          node --input-type=module -e "import { Vaartix, verifyWebhook } from './dist/index.js'; if (typeof Vaartix !== 'function' || typeof verifyWebhook !== 'function') process.exit(1)"
+          node -e "const { Vaartix } = require('./dist/index.cjs'); if (typeof Vaartix !== 'function') process.exit(1)"
