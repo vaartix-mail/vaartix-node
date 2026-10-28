@@ -1,7 +1,8 @@
 name: Publish to npm
 
-# Runs when a tag like v0.1.1 is pushed. Publishes with npm trusted publishing (OIDC): no npm
-# token is stored anywhere. The `npm` environment can require a maintainer's approval first.
+# Runs when a tag like v0.1.1 is pushed. Stages the release on npm with trusted publishing (OIDC):
+# no npm token is stored anywhere. The version stays hidden until a maintainer approves it with
+# their npm 2FA code (`npm stage approve`), so nobody can release through GitHub alone.
 on:
   push:
     tags: ["v*"]
@@ -29,6 +30,6 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      # Trusted publishing needs npm 11.5.1 or later.
+      # Staged publishing needs a recent npm.
       - run: npm install -g npm@latest
-      - run: npm publish
+      - run: npm stage publish
