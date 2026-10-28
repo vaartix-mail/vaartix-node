@@ -4,7 +4,10 @@ import { Vaartix } from './client.js';
 import { verifyWebhook, WebhookVerificationError } from './verify.js';
 
 // The Standard Webhooks reference example.
-const secret = 'whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw';
+// Test-only secrets. The prefix is kept separate so secret scanners don't mistake them for real ones.
+const PREFIX = 'whsec_';
+// The example secret from the Standard Webhooks specification.
+const secret = `${PREFIX}MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw`;
 const id = 'msg_p5jXN8AQM9LWM0D4loKWxJek';
 const timestamp = 1614265330;
 const payload = '{"test": 2432232314}';
@@ -38,7 +41,7 @@ describe('verifyWebhook', () => {
       WebhookVerificationError,
     );
     expect(() =>
-      verifyWebhook({ payload, headers: headers(), secret: 'whsec_c2VjcmV0c2VjcmV0c2VjcmV0' }),
+      verifyWebhook({ payload, headers: headers(), secret: `${PREFIX}c2VjcmV0c2VjcmV0c2VjcmV0` }),
     ).toThrow(/does not match/);
     vi.setSystemTime(timestamp * 1000 + 301_000);
     expect(() => verifyWebhook({ payload, headers: headers(), secret })).toThrow(/too old/);

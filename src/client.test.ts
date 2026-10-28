@@ -25,6 +25,17 @@ describe('Vaartix SDK', () => {
     expect(JSON.parse(init.body as string)).toMatchObject({ subject: 'Hi' });
   });
 
+  it('ignores any number of trailing slashes in baseUrl', async () => {
+    const fetch = mockFetch(200, { id: 'em_1' });
+    const vaartix = new Vaartix('vx_test', {
+      fetch,
+      baseUrl: `https://api.example.test${'/'.repeat(50_000)}`,
+    });
+    await vaartix.emails.get('em_1');
+    const [url] = fetch.mock.calls[0] as unknown as [string];
+    expect(url).toBe('https://api.example.test/emails/em_1');
+  });
+
   it('returns API errors instead of throwing', async () => {
     const fetch = mockFetch(422, {
       error: { type: 'validation_error', message: 'from is required' },

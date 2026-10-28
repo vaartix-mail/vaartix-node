@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `baseUrl` trailing slashes are trimmed without a regular expression (flagged by CodeQL; only
+  the developer controls this value).
+
 ## 0.1.1
 
 - The package now lives in its own public repository, github.com/vaartix-mail/vaartix-node, so the
