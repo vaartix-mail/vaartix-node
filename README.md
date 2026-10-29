@@ -64,6 +64,31 @@ await vaartix.emails.send({
 
 Pass `text` as well if you want to write the plain-text version yourself.
 
+## Nodemailer
+
+Already using [Nodemailer](https://nodemailer.com)? Swap the transport and keep your
+`sendMail()` code:
+
+```ts
+import nodemailer from 'nodemailer';
+import { vaartixTransport } from 'vaartix';
+
+const transporter = nodemailer.createTransport(vaartixTransport()); // reads VAARTIX_API_KEY
+
+const info = await transporter.sendMail({
+  from: 'Acme <orders@acme.in>',
+  to: 'priya@example.com',
+  subject: 'Order confirmed',
+  html: '<p>Thanks for your order!</p>',
+  attachments: [{ filename: 'invoice.pdf', path: './invoice.pdf' }],
+});
+console.log(info.messageId); // em_...
+```
+
+Attachments (any Nodemailer source), inline images (`cid`), cc, bcc, reply-to and custom headers
+work as usual. Add `tags`, `idempotencyKey` or `scheduledAt` to `sendMail()` to use those Vaartix
+features. Errors reject with `code` set to the Vaartix error type.
+
 ## Webhooks
 
 Check that a webhook request really came from Vaartix before you trust it. Use the raw body, not parsed JSON.
