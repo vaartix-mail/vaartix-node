@@ -1,6 +1,6 @@
 {
   "name": "vaartix",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Official Node.js SDK for the Vaartix email API",
   "license": "MIT",
   "type": "module",
@@ -17,7 +17,8 @@
     "vaartix",
     "react-email",
     "ses",
-    "sdk"
+    "sdk",
+    "nodemailer"
   ],
   "engines": {
     "node": ">=18"
@@ -57,7 +58,9 @@
     "@biomejs/biome": "^2.6.3",
     "@react-email/render": "^2.1.1",
     "@types/node": "^26.6.5",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.3.0",
+    "nodemailer": "^8.0.11",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsup": "^9.0.0",

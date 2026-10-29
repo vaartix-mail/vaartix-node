@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.2.0
+
+- Nodemailer transport: `nodemailer.createTransport(vaartixTransport())` sends existing
+  `sendMail()` calls through Vaartix, with attachments, inline images, headers, tags and
+  idempotency keys. `info.messageId` is the Vaartix email ID.
+
 - `baseUrl` trailing slashes are trimmed without a regular expression (flagged by CodeQL; only
   the developer controls this value).
 
