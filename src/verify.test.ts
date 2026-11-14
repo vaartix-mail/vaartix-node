@@ -94,3 +94,53 @@ describe('webhooks API', () => {
     ]);
   });
 });
+
+describe('open and click events', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('returns a typed email.clicked payload that narrows on type', () => {
+    const body = JSON.stringify({
+      type: 'email.clicked',
+      createdAt: '2026-10-28T10:05:41.000Z',
+      data: {
+        emailId: 'em_7hq2kv9xr4m1c8d3',
+        eventId: 'evt_5k2m8q1v7c3x9d4p',
+        recipient: 'rahul@example.in',
+        from: 'Acme <orders@acme.in>',
+        to: ['rahul@example.in'],
+        cc: [],
+        bcc: [],
+        subject: 'Your order has shipped',
+        tags: [{ name: 'flow', value: 'shipping' }],
+        emailCreatedAt: '2026-10-28T10:00:00.000Z',
+        details: {
+          machine: false,
+          machineReason: null,
+          linkIndex: 0,
+          link: 'https://acme.in/orders/123',
+          userAgentFamily: 'Chrome',
+          country: 'IN',
+          asn: 24560,
+        },
+      },
+    });
+    const sig = createHmac('sha256', Buffer.from(secret.slice(PREFIX.length), 'base64'))
+      .update(`${id}.${timestamp}.${body}`)
+      .digest('base64');
+    vi.useFakeTimers({ now: timestamp * 1000 });
+
+    const event = verifyWebhook({ payload: body, headers: headers(`v1,${sig}`), secret });
+    if (event.type !== 'email.clicked') throw new Error('expected email.clicked');
+    // Type-checked: after narrowing, these fields have their real types.
+    const link: string = event.data.details.link;
+    const linkIndex: number = event.data.details.linkIndex;
+    const reason: 'scanner' | 'scanner_network' | 'too_fast' | 'burst' | null =
+      event.data.details.machineReason;
+    expect({ link, linkIndex, reason, machine: event.data.details.machine }).toEqual({
+      link: 'https://acme.in/orders/123',
+      linkIndex: 0,
+      reason: null,
+      machine: false,
+    });
+  });
+});

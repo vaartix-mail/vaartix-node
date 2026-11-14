@@ -111,6 +111,10 @@ await vaartix.emails.send({
 
 ## Webhooks
 
+Endpoints receive `email.opened` and `email.clicked` only if they subscribe to them. Each has
+`details.machine`, which is `true` when the open or click was most likely not a person (an image
+proxy, Apple Mail Privacy Protection or a link scanner), with the reason in `details.machineReason`.
+
 Check that a webhook request really came from Vaartix before you trust it. Use the raw body, not parsed JSON.
 
 ```ts
@@ -125,6 +129,9 @@ app.post('/webhooks/vaartix', express.raw({ type: 'application/json' }), (req, r
     });
     if (event.type === 'email.bounced') {
       // stop emailing event.data.recipient
+    }
+    if (event.type === 'email.clicked' && !event.data.details.machine) {
+      // a person clicked event.data.details.link
     }
     res.sendStatus(200);
   } catch (err) {

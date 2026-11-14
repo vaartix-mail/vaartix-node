@@ -155,7 +155,9 @@ export type WebhookEventType =
   | 'email.complained'
   | 'email.rejected'
   | 'email.rendering_failure'
-  | 'email.suppressed';
+  | 'email.suppressed'
+  | 'email.opened'
+  | 'email.clicked';
 
 export interface Webhook {
   id: string;
@@ -182,14 +184,54 @@ export interface UpdateWebhookOptions {
   status?: 'enabled' | 'disabled';
 }
 
-/** The JSON body Vaartix posts to your endpoint. */
-export interface WebhookPayload {
-  type: WebhookEventType;
+/** `details` of an `email.opened` event. */
+export interface OpenedEventDetails {
+  /** True when the open was most likely not a person, such as an image proxy or Apple Mail Privacy Protection. */
+  machine: boolean;
+  machineReason: 'image_proxy' | 'apple_mpp' | 'too_fast' | null;
+  /** For example `Chrome`, `Apple Mail` or `Gmail image proxy`. More values may be added. */
+  userAgentFamily: string;
+  /** Two-letter country code, when known. */
+  country: string | null;
+  /** Network (autonomous system) number, when known. */
+  asn: number | null;
+  [field: string]: unknown;
+}
+
+/** `details` of an `email.clicked` event. */
+export interface ClickedEventDetails {
+  /** True when the click was most likely not a person, such as a link scanner. */
+  machine: boolean;
+  machineReason: 'scanner' | 'scanner_network' | 'too_fast' | 'burst' | null;
+  /** Position of the link in the email's HTML, starting at 0. */
+  linkIndex: number;
+  /** The original link URL. */
+  link: string;
+  /** For example `Chrome`, `Outlook` or `scanner`. More values may be added. */
+  userAgentFamily: string;
+  /** Two-letter country code, when known. */
+  country: string | null;
+  /** Network (autonomous system) number, when known. */
+  asn: number | null;
+  [field: string]: unknown;
+}
+
+/** The `details` object for each event type. */
+export type WebhookEventDetails<T extends WebhookEventType = WebhookEventType> =
+  T extends 'email.opened'
+    ? OpenedEventDetails
+    : T extends 'email.clicked'
+      ? ClickedEventDetails
+      : Record<string, unknown>;
+
+interface WebhookPayloadOf<T extends WebhookEventType> {
+  type: T;
   /** When the event happened. Deliveries can arrive out of order; sort by this. */
   createdAt: string;
   data: {
     emailId: string;
     eventId: string;
+    /** `null` when the email had more than one recipient. */
     recipient: string | null;
     from: string;
     to: string[];
@@ -198,9 +240,16 @@ export interface WebhookPayload {
     subject: string;
     tags: Tag[];
     emailCreatedAt: string;
-    details: Record<string, unknown>;
+    details: WebhookEventDetails<T>;
   };
 }
+
+/**
+ * The JSON body Vaartix posts to your endpoint. Check `type` to narrow it:
+ * after `if (payload.type === 'email.clicked')`, `payload.data.details.link` is a string.
+ */
+export type WebhookPayload<T extends WebhookEventType = WebhookEventType> =
+  T extends WebhookEventType ? WebhookPayloadOf<T> : never;
 
 export interface WebhookDelivery {
   /** Also sent as the `webhook-id` header. */
