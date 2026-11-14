@@ -8,7 +8,9 @@
   `batch.send()`, overriding the sending domain's defaults. `emails.get()` returns the email's own
   `tracking` setting (or `null` when it uses the domain's defaults).
 - `domains.update(id, { openTracking, clickTracking })` changes a domain's tracking defaults.
-- Typed `email.opened` / `email.clicked` webhook payloads will follow once those events are live.
+- `email.opened` and `email.clicked` webhook events, with typed `details` (`OpenedEventDetails`,
+  `ClickedEventDetails`). `WebhookPayload` is now a union you can narrow by `type`; other events'
+  `details` stay `Record<string, unknown>`.
 
 ## 0.2.0
 
