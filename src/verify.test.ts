@@ -1,6 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Vaartix } from './client.js';
+import type { WebhookPayload } from './types.js';
 import { verifyWebhook, WebhookVerificationError } from './verify.js';
 
 // The Standard Webhooks reference example.
@@ -142,5 +143,47 @@ describe('open and click events', () => {
       reason: null,
       machine: false,
     });
+  });
+});
+
+describe('delay and bounce details', () => {
+  it('narrows email.delivery_delayed and email.bounced details', () => {
+    const delayed = {
+      type: 'email.delivery_delayed',
+      data: {
+        details: {
+          delayType: 'TransientCommunicationFailure',
+          diagnosticCode: '421 4.7.0 [TSS04] Messages from 1.2.3.4 temporarily deferred',
+          statusCode: '4.7.0',
+          expirationTime: '2026-11-15T10:00:00.000Z',
+        },
+      },
+    } as unknown as WebhookPayload;
+    const bounced = {
+      type: 'email.bounced',
+      data: {
+        details: {
+          bounceType: 'Permanent',
+          bounceSubType: 'General',
+          diagnostics: [],
+          diagnosticCode: '550 5.1.1 user unknown',
+          statusCode: '5.1.1',
+        },
+      },
+    } as unknown as WebhookPayload;
+    const reasons: (string | undefined)[] = [];
+    for (const event of [delayed, bounced]) {
+      if (event.type === 'email.delivery_delayed') {
+        const d = event.data.details;
+        reasons.push('bounceType' in d ? `soft bounce: ${d.diagnosticCode}` : d.diagnosticCode);
+      } else if (event.type === 'email.bounced') {
+        const kind: 'Permanent' | 'Transient' | 'Undetermined' = event.data.details.bounceType;
+        reasons.push(`${kind}: ${event.data.details.diagnosticCode}`);
+      }
+    }
+    expect(reasons).toEqual([
+      '421 4.7.0 [TSS04] Messages from 1.2.3.4 temporarily deferred',
+      'Permanent: 550 5.1.1 user unknown',
+    ]);
   });
 });
