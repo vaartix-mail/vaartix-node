@@ -75,6 +75,45 @@ describe('Vaartix SDK', () => {
     expect(calls[1]?.[0]).toBe('https://api.example.test/emails?limit=5&before=em_9');
   });
 
+  it('sends tracking settings and leaves them out when not given', async () => {
+    const fetch = mockFetch(200, { id: 'em_1' });
+    const vaartix = new Vaartix('vx_test', { fetch });
+    await vaartix.emails.send({
+      from: 'a@acme.in',
+      to: 'b@example.com',
+      subject: 'Hi',
+      html: '<p>Hi</p>',
+      tracking: { opens: true, clicks: false },
+    });
+    await vaartix.emails.send({ from: 'a@acme.in', to: 'b@example.com', subject: 'Hi', html: 'x' });
+    await vaartix.batch.send([
+      {
+        from: 'a@acme.in',
+        to: 'b@example.com',
+        subject: 'A',
+        html: 'a',
+        tracking: { clicks: true },
+      },
+    ]);
+    const bodies = (fetch.mock.calls as unknown as [string, RequestInit][]).map(([, init]) =>
+      JSON.parse(init.body as string),
+    );
+    expect(bodies[0].tracking).toEqual({ opens: true, clicks: false });
+    expect('tracking' in bodies[1]).toBe(false);
+    expect(bodies[2][0].tracking).toEqual({ clicks: true });
+  });
+
+  it("updates a domain's tracking defaults", async () => {
+    const fetch = mockFetch(200, { id: 'dom_1', openTracking: true, clickTracking: false });
+    const vaartix = new Vaartix('vx_test', { fetch });
+    const result = await vaartix.domains.update('dom_1', { openTracking: true });
+    expect(result.data?.openTracking).toBe(true);
+    const [url, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://api.vaartix.com/domains/dom_1');
+    expect(init.method).toBe('PATCH');
+    expect(JSON.parse(init.body as string)).toEqual({ openTracking: true });
+  });
+
   it('requires an API key', () => {
     const saved = process.env.VAARTIX_API_KEY;
     delete process.env.VAARTIX_API_KEY;

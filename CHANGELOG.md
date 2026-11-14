@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.3.0
+
+- Open and click tracking: `tracking: { opens, clicks }` on `emails.send()` and on each email in
+  `batch.send()`, overriding the sending domain's defaults. `emails.get()` returns the email's own
+  `tracking` setting (or `null` when it uses the domain's defaults).
+- `domains.update(id, { openTracking, clickTracking })` changes a domain's tracking defaults.
+- Typed `email.opened` / `email.clicked` webhook payloads will follow once those events are live.
+
 ## 0.2.0
 
 - Nodemailer transport: `nodemailer.createTransport(vaartixTransport())` sends existing

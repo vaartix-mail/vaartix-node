@@ -13,6 +13,18 @@ export interface Attachment {
   contentId?: string;
 }
 
+/**
+ * Open and click tracking for one email. Each field overrides the sending domain's default
+ * (both off unless changed); a field left out uses the domain's setting. Only HTML parts are
+ * tracked, and only http/https links are rewritten.
+ */
+export interface TrackingSettings {
+  /** Add an open-tracking pixel. */
+  opens?: boolean;
+  /** Rewrite links to count clicks. */
+  clicks?: boolean;
+}
+
 export interface SendEmailOptions {
   from: string;
   to: string | string[];
@@ -32,6 +44,8 @@ export interface SendEmailOptions {
   attachments?: Attachment[];
   /** ISO 8601 date-time to send later, e.g. `2026-11-01T09:00:00+05:30`. */
   scheduledAt?: string;
+  /** Open and click tracking for this email, overriding the domain's defaults. */
+  tracking?: TrackingSettings;
 }
 
 export interface SendEmailResponse {
@@ -80,7 +94,25 @@ export interface Email extends EmailSummary {
   html: string | null;
   text: string | null;
   headers: Record<string, string>;
+  /** The email's own tracking setting, or null when it uses the domain's defaults. */
+  tracking: TrackingSettings | null;
   events: EmailEvent[];
+}
+
+/** A sending domain. Only the tracking fields are typed so far. */
+export interface Domain {
+  id: string;
+  /** Open tracking for this domain's emails unless an email overrides it. */
+  openTracking: boolean;
+  /** Click tracking for this domain's emails unless an email overrides it. */
+  clickTracking: boolean;
+  [field: string]: unknown;
+}
+
+/** Fields left out keep their current value. */
+export interface UpdateDomainOptions {
+  openTracking?: boolean;
+  clickTracking?: boolean;
 }
 
 export interface ListEmailsOptions {
