@@ -89,6 +89,26 @@ Attachments (any Nodemailer source), inline images (`cid`), cc, bcc, reply-to an
 work as usual. Add `tags`, `idempotencyKey` or `scheduledAt` to `sendMail()` to use those Vaartix
 features. Errors reject with `code` set to the Vaartix error type.
 
+## Open and click tracking
+
+Tracking is off unless you turn it on, for a whole domain or for one email. Only HTML emails are
+tracked. Keep click tracking off for password-reset, magic-link and OTP emails.
+
+```ts
+// Default for every email from a domain (needs a full-access key from an owner or admin).
+// domainId is the domain's ID from the dashboard or the API.
+await vaartix.domains.update(domainId, { openTracking: true, clickTracking: true });
+
+// Override for one email
+await vaartix.emails.send({
+  from: 'Acme <orders@acme.in>',
+  to: 'priya@example.com',
+  subject: 'Your order has shipped',
+  html: '<p>Track it <a href="https://acme.in/orders/123">here</a></p>',
+  tracking: { opens: true, clicks: true },
+});
+```
+
 ## Webhooks
 
 Check that a webhook request really came from Vaartix before you trust it. Use the raw body, not parsed JSON.

@@ -1,6 +1,6 @@
 {
   "name": "vaartix",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Official Node.js SDK for the Vaartix email API",
   "license": "MIT",
   "type": "module",

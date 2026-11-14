@@ -1,6 +1,7 @@
 import type {
   ClientOptions,
   CreateWebhookOptions,
+  Domain,
   Email,
   EmailSummary,
   ListEmailsOptions,
@@ -9,6 +10,7 @@ import type {
   Result,
   SendEmailOptions,
   SendEmailResponse,
+  UpdateDomainOptions,
   UpdateWebhookOptions,
   VaartixError,
   Webhook,
@@ -17,7 +19,7 @@ import type {
 } from './types.js';
 import { type VerifyWebhookOptions, verifyWebhook } from './verify.js';
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 const DEFAULT_BASE_URL = 'https://api.vaartix.com';
 
 /** Drop trailing slashes. A loop, not a regex, so a very long input can't slow it down. */
@@ -31,6 +33,7 @@ export class Vaartix {
   readonly emails: Emails;
   readonly batch: Batch;
   readonly webhooks: Webhooks;
+  readonly domains: Domains;
   readonly #key: string;
   readonly #baseUrl: string;
   readonly #fetch: typeof fetch;
@@ -48,6 +51,7 @@ export class Vaartix {
     this.emails = new Emails(this);
     this.batch = new Batch(this);
     this.webhooks = new Webhooks(this);
+    this.domains = new Domains(this);
   }
 
   /** @internal */
@@ -179,6 +183,20 @@ class Batch {
       rendered.push(result.email);
     }
     return this.#client.request<{ data: SendEmailResponse[] }>('POST', '/emails/batch', rendered);
+  }
+}
+
+/** Sending domains. Changing them needs a full-access key from an owner or admin. */
+class Domains {
+  readonly #client: Vaartix;
+
+  constructor(client: Vaartix) {
+    this.#client = client;
+  }
+
+  /** Change a domain's default open and click tracking. Fields left out keep their value. */
+  update(id: string, options: UpdateDomainOptions) {
+    return this.#client.request<Domain>('PATCH', `/domains/${encodeURIComponent(id)}`, options);
   }
 }
 
