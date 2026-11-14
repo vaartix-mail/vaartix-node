@@ -74,7 +74,7 @@ describe('Nodemailer transport', () => {
       text: 'Hi',
       tags: [{ name: 'type', value: 'welcome' }],
       idempotencyKey: 'welcome-42',
-    } as nodemailer.SendMailOptions);
+    } as Parameters<typeof transporter.sendMail>[0]);
     expect(sent().tags).toEqual([{ name: 'type', value: 'welcome' }]);
     const headers = (fetch.mock.calls[0] as unknown as [string, RequestInit])[1].headers as Record<
       string,
