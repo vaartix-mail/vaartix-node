@@ -216,13 +216,44 @@ export interface ClickedEventDetails {
   [field: string]: unknown;
 }
 
+/** `details` of an `email.delivery_delayed` event while the receiving server keeps deferring. */
+export interface DelayedEventDetails {
+  /** SES's delay category, for example `TransientCommunicationFailure` or `MailboxFull`. */
+  delayType?: string;
+  /** When Amazon SES stops retrying (ISO 8601). */
+  expirationTime?: string;
+  /** The receiving server's exact reply, for example Yahoo's `421 4.7.0 [TSS04] …` line. */
+  diagnosticCode?: string;
+  /** The enhanced status code, for example `4.7.0`. */
+  statusCode?: string;
+  [field: string]: unknown;
+}
+
+/** `details` of an `email.bounced` event, or a soft bounce sent as `email.delivery_delayed`. */
+export interface BounceEventDetails {
+  bounceType: 'Permanent' | 'Transient' | 'Undetermined';
+  bounceSubType?: string;
+  /** @deprecated Use `diagnosticCode`. */
+  diagnostics: string[];
+  /** The receiving server's exact reply. */
+  diagnosticCode?: string;
+  /** The enhanced status code, for example `5.1.1`. */
+  statusCode?: string;
+  [field: string]: unknown;
+}
+
 /** The `details` object for each event type. */
 export type WebhookEventDetails<T extends WebhookEventType = WebhookEventType> =
   T extends 'email.opened'
     ? OpenedEventDetails
     : T extends 'email.clicked'
       ? ClickedEventDetails
-      : Record<string, unknown>;
+      : T extends 'email.bounced'
+        ? BounceEventDetails
+        : T extends 'email.delivery_delayed'
+          ? // A soft bounce also arrives as email.delivery_delayed: check for 'bounceType'.
+            DelayedEventDetails | BounceEventDetails
+          : Record<string, unknown>;
 
 interface WebhookPayloadOf<T extends WebhookEventType> {
   type: T;
