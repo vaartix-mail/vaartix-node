@@ -141,6 +141,23 @@ app.post('/webhooks/vaartix', express.raw({ type: 'application/json' }), (req, r
 });
 ```
 
+## Command line
+
+The package includes a `vaartix` command, handy for testing and for AI coding agents:
+
+```sh
+export VAARTIX_API_KEY=vx_...
+npx vaartix send --from "Acme <hello@acme.in>" --to delivered@test.vaartix.com \
+  --subject "Hello" --html-file welcome.html
+npx vaartix get em_...                 # status, events and the receiving server's reply
+npx vaartix list --limit 20
+npx vaartix cancel em_...              # a scheduled email
+```
+
+`--to`, `--cc`, `--bcc`, `--reply-to` and `--tag name=value` can be repeated. Add `--json` for the API's
+JSON, `--scheduled-at` to send later, `--track-opens` / `--track-clicks`, and `--idempotency-key` for safe
+retries. Exit codes: 0 success, 1 API error, 2 usage error. Run `npx vaartix --help` for everything.
+
 ## Docs
 
 Full API reference and guides: [vaartix.com/docs](https://vaartix.com/docs). Guides for
