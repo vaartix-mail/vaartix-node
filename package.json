@@ -1,7 +1,7 @@
 {
   "name": "vaartix",
   "version": "0.3.0",
-  "description": "Official Node.js SDK for the Vaartix email API",
+  "description": "Official Node.js SDK and CLI for the Vaartix email API",
   "license": "MIT",
   "type": "module",
   "homepage": "https://vaartix.com/docs/sdks/node/",
@@ -18,7 +18,8 @@
     "react-email",
     "ses",
     "sdk",
-    "nodemailer"
+    "nodemailer",
+    "cli"
   ],
   "engines": {
     "node": ">=18"
@@ -39,7 +40,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --clean --target node18 && tsc -p tsconfig.build.json",
+    "build": "tsup src/index.ts src/cli.ts --format esm,cjs --clean --target node18 && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome format --write .",
@@ -74,5 +75,8 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "bin": {
+    "vaartix": "./dist/cli.js"
   }
 }

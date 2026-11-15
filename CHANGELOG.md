@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- `vaartix` command line tool in the package: `npx vaartix send | get | list | cancel`, with `--json`
+  output and exit codes (0 ok, 1 API error, 2 usage error). No new dependencies.
+
 - Typed `details` for `email.delivery_delayed` (`DelayedEventDetails`, or `BounceEventDetails` for
   a soft bounce) and `email.bounced` (`BounceEventDetails`), including `diagnosticCode`: the
   receiving server's exact reply, such as Yahoo's `421 4.7.0 [TSS04]` line.
