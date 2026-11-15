@@ -19,7 +19,7 @@ import type {
 } from './types.js';
 import { type VerifyWebhookOptions, verifyWebhook } from './verify.js';
 
-export const VERSION = '0.3.0';
+export const VERSION = '0.4.0';
 const DEFAULT_BASE_URL = 'https://api.vaartix.com';
 
 /** Drop trailing slashes. A loop, not a regex, so a very long input can't slow it down. */
