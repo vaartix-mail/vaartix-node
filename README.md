@@ -2,7 +2,7 @@
 
 Official Node.js SDK for [Vaartix](https://vaartix.com), the email API for Indian developers.
 
-> Vaartix is in private beta. The API opens with the beta.
+> Create a free account at [app.vaartix.com](https://app.vaartix.com): 5,000 emails a month on the free plan, no card needed to start.
 
 ```sh
 npm install vaartix
