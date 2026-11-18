@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **CLI: safe terminal output.** `vaartix get`, `list` and error messages now print control characters and bidirectional-override characters from API data (for example a bounce's SMTP reply or an email subject) as visible escapes such as `\x1b`, so they can't rewrite the terminal, set links or write to the clipboard. `--json` output was already safe.
+
+## Unreleased
+
 ## 0.4.0
 
 - `vaartix` command line tool in the package: `npx vaartix send | get | list | cancel`, with `--json`
