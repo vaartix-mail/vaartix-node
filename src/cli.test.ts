@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { run } from './cli.js';
+import { run, terminalSafe } from './cli.js';
 
 function setup(status = 200, body: unknown = { id: 'em_123' }) {
   const fetch = vi.fn(async () => new Response(JSON.stringify(body), { status }));
@@ -107,6 +107,36 @@ describe('vaartix CLI', () => {
     expect(await run(['get', 'em_1'], t.io)).toBe(0);
     expect(t.out[0]).toContain('em_1  bounced');
     expect(t.out[0]).toContain('550 5.1.1 user unknown');
+  });
+
+  it('never writes terminal control sequences from API data', async () => {
+    const esc = '\x1b';
+    const t = setup(200, {
+      id: 'em_1',
+      status: 'bounced',
+      from: 'a@acme.in',
+      to: ['x@x.in'],
+      subject: `Hi${esc}]8;;https://evil.example${esc}\\click${esc}]8;;${esc}\\`,
+      createdAt: 'c',
+      error: null,
+      events: [
+        {
+          type: 'bounced',
+          recipient: 'x@x.in',
+          occurredAt: 't',
+          data: { diagnosticCode: `550 rejected${esc}[1A${esc}[2K\rdelivered‮` },
+        },
+      ],
+    });
+    expect(await run(['get', 'em_1'], t.io)).toBe(0);
+    const shown = t.out[0] ?? '';
+    expect(terminalSafe(shown)).toBe(shown);
+    expect(shown).toContain('550 rejected\\x1b[1A\\x1b[2K\\x0ddelivered\\u202e');
+    expect(shown).toContain('\n');
+
+    const e = setup(500, { error: { type: 'api_error', message: `boom${esc}[31m` } });
+    expect(await run(['get', 'em_1'], e.io)).toBe(1);
+    expect(e.err[0]).toBe('Error (api_error, 500): boom\\x1b[31m');
   });
 
   it('lists and cancels', async () => {

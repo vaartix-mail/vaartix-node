@@ -205,6 +205,21 @@ function need(value: string | undefined, message: string): string {
   return value;
 }
 
+// Control characters (except tab and newline) and bidirectional overrides, written as visible escapes.
+// Email fields such as a bounce's SMTP reply or a subject can come from third parties, and a
+// terminal would otherwise act on escape sequences in them (rewrite lines, set links, the clipboard).
+// biome-ignore lint/suspicious/noControlCharactersInRegex: matching control characters is the point
+const UNSAFE = /[\x00-\x08\x0b-\x1f\x7f-\x9f‪-‮⁦-⁩]/g;
+
+export function terminalSafe(text: string): string {
+  return text.replace(UNSAFE, (c) => {
+    const code = c.charCodeAt(0);
+    return code <= 0xff
+      ? `\\x${code.toString(16).padStart(2, '0')}`
+      : `\\u${code.toString(16).padStart(4, '0')}`;
+  });
+}
+
 function print<T>(
   res: Result<T>,
   io: CliIO,
@@ -215,11 +230,13 @@ function print<T>(
     if (json) io.out(JSON.stringify({ error: res.error }, null, 2));
     else
       io.err(
-        `Error (${res.error.type}${res.error.statusCode ? `, ${res.error.statusCode}` : ''}): ${res.error.message}`,
+        terminalSafe(
+          `Error (${res.error.type}${res.error.statusCode ? `, ${res.error.statusCode}` : ''}): ${res.error.message}`,
+        ),
       );
     return 1;
   }
-  io.out(json ? JSON.stringify(res.data, null, 2) : human(res.data));
+  io.out(json ? JSON.stringify(res.data, null, 2) : terminalSafe(human(res.data)));
   return 0;
 }
 
